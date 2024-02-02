@@ -31,7 +31,8 @@ for ii=1:length(intensity)
         btn2 = 'OPTION2: Set values <=0 to eps';
         btn3 = 'CANCEL';
         detbtn = btn3;
-        answer = questdlg(quest,dlgtitle,btn1,btn2,btn3, detbtn);
+        %answer = questdlg(quest,dlgtitle,btn1,btn2,btn3, detbtn);
+        answer = btn2;
         switch answer  
             case 'OPTION1: Add a dc offset'
                 for j = 1:size(d,2)
