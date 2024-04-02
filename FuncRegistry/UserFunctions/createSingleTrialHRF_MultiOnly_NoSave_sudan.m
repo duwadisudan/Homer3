@@ -28,13 +28,10 @@
 % None.
 
 function [singleTrialHRFHbOM, singleTrialHRFHbRM, singleTrialHRFHbTM] ...
-    = createSingleTrialHRF_MultiOnly_NoSave_sudan_nn22(trialsCont, allSMultiple)
+    = createSingleTrialHRF_MultiOnly_NoSave_sudan(trialsCont, allSMultiple,fs)
 
-fs  = 8.988;
 % dcNew.dataTimeSeries: time x concentration x channels
-%dcReshape = trialsCont.GetDataTimeSeries('reshape');
-
-dcReshape = trialsCont.dataTimeSeries;
+dcReshape = trialsCont.GetDataTimeSeries('reshape');
 %t = dcNew.GetT;
 t = -2:1/fs:15;
 tLen = length(t)-1;
