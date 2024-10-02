@@ -22,7 +22,7 @@ function varargout = PlotProbe2(varargin)
 
 % Edit the above text to modify the response to help PlotProbe2
 
-% Last Modified by GUIDE v2.5 22-Feb-2024 10:25:49
+% Last Modified by GUIDE v2.5 09-May-2024 07:29:21
 
 % Return if snirf object was not passed
 if isempty(varargin)
@@ -81,6 +81,13 @@ if ischar(varargin{1})
 else
     snirfObj = varargin{1};
 end
+
+% Assign snirfObj to handles
+handles.snirfObj = snirfObj;
+
+% Update handles structure
+guidata(hObject, handles);
+
 dataTypeLabels = {};
 dataTypeOrder = {};
 measList = [];
@@ -122,7 +129,7 @@ for v = 1:length(snirfObj.data)
             snirfObj.data(v).dataTimeSeries(:,u) = snirfObj.data(v).dataTimeSeries(:,u) -(minAmp+ maxAmp)/2;
             minAmp = minAmp-(minAmp+ maxAmp)/2;
             maxAmp = maxAmp-(minAmp+ maxAmp)/2;
-            if strcmp(dataTypeLabel,'HRF HbO') || strcmp(dataTypeLabel,'HRF HbO') || strcmp(dataTypeLabel,'HRF HbO')
+            if strcmp(dataTypeLabel,'HRF HbO')
                 dataTypeOrder{end+1} = 'HRF HbX';
             elseif contains(dataTypeLabel,'dOD')
                 dataTypeOrder{end+1} = 'dOD';
@@ -213,11 +220,10 @@ end
 display(handles);
 guidata(hObject,handles)
 
-
 function display(handles)
 
-if isfield(handles,'data') & isfield(handles.data, 'snirfObj') 
-    
+if isfield(handles, 'data') && isfield(handles.data, 'snirfObj')
+
     snirfObj = handles.data.snirfObj;
     measList = handles.data.measList;
     sPos = snirfObj.probe.sourcePos2D;
@@ -357,7 +363,7 @@ if isfield(handles,'data') & isfield(handles.data, 'snirfObj')
         end
     end
     if data_index~= 0
-        SigCh = [1; 36; 48; 50];
+        
         for u = 1:length(snirfObj.data(data_index).measurementList)
             activityConditionIndex = GetCondition(snirfObj.data(data_index).measurementList(u));
             if any(selected_conditions_index == 1) || any(selected_conditions_index == activityConditionIndex+1)
@@ -378,23 +384,29 @@ if isfield(handles,'data') & isfield(handles.data, 'snirfObj')
 
                 current_color_HbO = color_condition_1; 
                 current_color_HbR = color_condition_3;
+                current_color_HbT = color_condition_5;
 
-                if any(selected_conditions_index == 2) && activityConditionIndex + 1 == 2
-                    current_color_HbO = color_condition_1; % Red for condition 1
-                    current_color_HbR = color_condition_3; % Blue for condition 2
-                    current_color_HbT = color_condition_5; % for condition 3
-                elseif any(selected_conditions_index == 3) && activityConditionIndex + 1 == 3
-                    current_color_HbO = color_condition_2; % Magenta for condition 2
-                    current_color_HbR = color_condition_4; % Cyan for condition 2
-                    current_color_HbT = color_condition_6; % for condition 2
+                if length(selected_conditions_index) == 2
+                    if any(selected_conditions_index == 2) && activityConditionIndex + 1 == 2
+                        current_color_HbO = color_condition_1; % Red for condition 1
+                        current_color_HbR = color_condition_3; % Blue for condition 2
+                        current_color_HbT = color_condition_5; % for condition 3
+                    elseif any(selected_conditions_index == 3) && activityConditionIndex + 1 == 3
+                        current_color_HbO = color_condition_2; % Magenta for condition 2
+                        current_color_HbR = color_condition_4; % Cyan for condition 2
+                        current_color_HbT = color_condition_6; % for condition 2
+                    end
                 end
-                        
+    
                 
                 srcIdx = GetSourceIndex(snirfObj.data(data_index).measurementList(u));
                 detIdx = GetDetectorIndex(snirfObj.data(data_index).measurementList(u));                  
 
                 
                 channel_dist = sqrt(sum((sourcePos3D(srcIdx,:) - detectorPos3D(detIdx ,:)).^2));
+
+
+                lineWidth = 1;
 
                 fade_factor = 0.7;
                 
@@ -404,9 +416,6 @@ if isfield(handles,'data') & isfield(handles.data, 'snirfObj')
                      current_color_HbO = current_color_HbO + (1-current_color_HbO)*fade_factor;
                      current_color_HbR = current_color_HbR + (1-current_color_HbR)*fade_factor;
                      current_color_HbT = current_color_HbT + (1-current_color_HbT)*fade_factor;
-
-                else
-
                 end
                 
                 if channel_dist >= channel_min_dist & channel_dist <= channel_max_dist
@@ -443,6 +452,9 @@ if isfield(handles,'data') & isfield(handles.data, 'snirfObj')
                     end
                     xT = xa-axWid/4 + axWid*((t-minT)/(maxT-minT))/2;
                     xyas = [xyas; [xa, ya]];
+
+
+
                     Avg = snirfObj.data(data_index).dataTimeSeries(:,u);
             %         minAmp=squeeze(min(min(Avg)));
             %         maxAmp=squeeze(max(max(Avg)));
@@ -453,25 +465,26 @@ if isfield(handles,'data') & isfield(handles.data, 'snirfObj')
             %         cmin = min(AvgT);
             %         cmax = max(AvgT);
             %          AvgT = AvgT-(cmin+cmax)/2;
+                           
                     
                     
                     if any(contains(selected_display_activities,dataTypeLabel)) & contains(dataTypeLabel,'HbO')
-                        plot(xT, AvgT, 'color', current_color_HbO);
+                        plot(xT, AvgT, 'color', current_color_HbO, 'LineWidth', lineWidth);
                     elseif any(contains(selected_display_activities,dataTypeLabel)) & contains(dataTypeLabel,'HbR')
-                        plot( xT, AvgT,'color', current_color_HbR);
+                        plot( xT, AvgT,'color', current_color_HbR,'LineWidth', lineWidth);
                     elseif any(contains(selected_display_activities,dataTypeLabel)) & contains(dataTypeLabel,'HbT')
-                        plot( xT, AvgT,'color',current_color_HbT);
+                        plot( xT, AvgT,'color',current_color_HbT,'LineWidth', lineWidth);
                     elseif any(contains(selected_display_activities,dataTypeLabel))
-                        plot( xT, AvgT,'color',color(4,:));
+                        plot( xT, AvgT,'color',color(4,:),'LineWidth', lineWidth);
                     end
                 end
             end
         end
     end
     hold off
-    if get(handles.checkbox_axisImage,'Value')
+    %if get(handles.checkbox_axisImage,'Value')
         axis image
-    end
+    %end
 end
 
 
@@ -576,7 +589,7 @@ function edit_Xscale_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit_Xscale as text
 %        str2double(get(hObject,'String')) returns contents of edit_Xscale as a double
-
+axis image
 display(handles)
 
 
@@ -601,7 +614,7 @@ function edit_Yscale_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit_Yscale as text
 %        str2double(get(hObject,'String')) returns contents of edit_Yscale as a double
-
+axis image
 display(handles)
 
 
@@ -816,7 +829,6 @@ function checkbox_axisImage_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_axisImage
-
 display(handles)
 
 
@@ -882,6 +894,7 @@ function edit_ssFadeThres_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit_ssFadeThres as text
 %        str2double(get(hObject,'String')) returns contents of edit_ssFadeThres as a double
+display(handles)
 
 
 % --- Executes during object creation, after setting all properties.
@@ -895,3 +908,6 @@ function edit_ssFadeThres_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+
