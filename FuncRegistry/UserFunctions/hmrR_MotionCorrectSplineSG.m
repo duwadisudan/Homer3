@@ -84,12 +84,14 @@ for iBlk = 1:length(data_d)
     dod = dod(extend+1:end-extend,:); % removing the extention
     
     %%%% Savitzky_Golay filter
-    K = 3; % polynomial order
-    FrameSize_sec = round(FrameSize_sec * fs);
-    if mod(FrameSize_sec,2)==0
-        FrameSize_sec = FrameSize_sec  + 1;
+    if turnon == 1
+        K = 3; % polynomial order
+        FrameSize_sec = round(FrameSize_sec * fs);
+        if mod(FrameSize_sec,2)==0
+            FrameSize_sec = FrameSize_sec  + 1;
+        end
+        dod = sgolayfilt(dod,K,FrameSize_sec);
     end
-    dod = sgolayfilt(dod,K,FrameSize_sec);
 
     dod(:,order) = dod(:,:);
     data_d(iBlk).SetDataTimeSeries(dod);

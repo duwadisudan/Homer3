@@ -1033,6 +1033,7 @@ if maingui.dataTree.LoadCurrElem() < 0
     MessageBox('Could not load current processing element. Acquisition files might be outdated or corrupted');
     return;
 end
+set(handles.textFileWarning, 'string',maingui.dataTree.currElem.GetErrorMsg(), 'fontsize',8, 'fontweight','bold');
 
 DisplayAxesSDG(handles);
 hObject = DisplayData(handles, hObject);
@@ -1199,6 +1200,11 @@ end
 % ----------------------------------------------------------------------------------
 function DisplayStim(handles, hAxes)
 global maingui
+
+if strcmp(get(handles.menuItemHideStims, 'checked'), 'on')
+    return;
+end
+
 dataTree = maingui.dataTree;
 procElem = dataTree.currElem;
 
@@ -1418,14 +1424,14 @@ end
 
 
 % --------------------------------------------------------------------
-function menuItemResetGroupFolder_Callback(hObject, eventdata, handles)
+function menuItemResetGroupFolder_Callback(~, ~, handles)
 resetGroupFolder();
 DisplayGroupTree(handles);
 
 
 
 % --------------------------------------------------------------------
-function pushbuttonDataPanLeft_Callback(hObject, eventdata, handles)
+function pushbuttonDataPanLeft_Callback(hObject, ~, handles)
 global maingui
 procElem = maingui.dataTree.currElem;
 iCh0     = maingui.axesSDG.iCh;
@@ -1473,7 +1479,7 @@ pushbuttonDataPanLeft_Callback(hObject, eventdata, handles)
 
 
 % --------------------------------------------------------------------
-function pushbuttonDataResetView_Callback(hObject, eventdata, handles)
+function pushbuttonDataResetView_Callback(hObject, ~, handles)
 global maingui
 set(handles.checkboxFixRangeX, 'value',0);
 set(handles.checkboxFixRangeY, 'value',0);
@@ -1704,7 +1710,7 @@ Display(handles, hObject);
 
 
 % --------------------------------------------------------------------
-function checkboxExcludeStims_Callback(hObject, eventdata, handles)
+function checkboxExcludeStims_Callback(hObject, ~, handles)
 global maingui
 
 hAxesData = maingui.axesData.handles.axes;
@@ -1731,7 +1737,7 @@ Display(handles, hObject);
 
 
 % --------------------------------------------------------------------
-function ExcludeTime_ButtonDownFcn(hObject, eventdata, handles)
+function ExcludeTime_ButtonDownFcn(hObject, ~, handles)
 global maingui
 
 % Make sure the user clicked on the axes and not 
@@ -1765,7 +1771,7 @@ Display(handles, hObject);
 
 
 % --------------------------------------------------------------------
-function ExcludeStims_ButtonDownFcn(hObject, eventdata, handles)
+function ExcludeStims_ButtonDownFcn(hObject, ~, handles)
 global maingui
 
 if ~strcmp(get(hObject,'type'),'axes')
@@ -1954,7 +1960,6 @@ end
 
 % -------------------------------------------------------------------------------
 function togglebuttonMinimizeGUI_Callback(hObject, ~, handles)
-u0 = get(handles.MainGUI, 'units');
 k = [1.0, 1.0, 0.8, 0.8];
 p0 = get(handles.MainGUI, 'position');
 if strcmp(get(hObject, 'tooltipstring'), 'Minimize GUI Window')
@@ -2065,10 +2070,10 @@ if get(hObject,'string')=='<'
 elseif get(hObject,'string')=='>'
     xlim( [xrange(1)+xd/5 xrange(2)+xd/5] );
     maingui.axesSDG.xlim = [xrange(1)+xd/5 xrange(2)+xd/5];
-elseif get(hObject,'string')=='/\'
+elseif strcmp(get(hObject,'string'), '/\')
     ylim( [yrange(1)+yd/5 yrange(2)+yd/5] );
     maingui.axesSDG.ylim = [yrange(1)+yd/5 yrange(2)+yd/5];
-elseif get(hObject,'string')=='\/'
+elseif strcmp(get(hObject,'string'), '\/')
     ylim( [yrange(1)-yd/5 yrange(2)-yd/5] );
     maingui.axesSDG.ylim = [yrange(1)-yd/5 yrange(2)-yd/5];
 end
@@ -2265,3 +2270,16 @@ maingui.dataTree.currElem.ExportStim();
 function menuItemReloadStim_Callback(hObject, ~, handles)
 global maingui
 maingui.dataTree.currElem.EditStim();
+
+
+
+
+% --------------------------------------------------------------------
+function menuItemHideStims_Callback(hObject, ~, handles)
+if strcmp(get(hObject, 'checked'), 'on')
+    set(hObject, 'checked','off');
+elseif strcmp(get(hObject, 'checked'), 'off')
+    set(hObject, 'checked','on');
+end
+DisplayData(handles, hObject);
+
